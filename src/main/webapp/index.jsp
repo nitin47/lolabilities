@@ -1,5 +1,5 @@
 <html>
 <body>
-    <h2>Eye Queue on the Move!</h2>
+    This is a Web Service.
 </body>
 </html>
