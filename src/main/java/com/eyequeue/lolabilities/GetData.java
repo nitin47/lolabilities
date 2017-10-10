@@ -48,6 +48,7 @@ public class GetData {
                 ChampionRecord champ = new ChampionRecord();
                 champ.setId(rs.getInt("id"));
                 champ.setName(rs.getString("name"));
+                champ.setImage(rs.getString("image"));
                 champ.setDetails(rs.getString("details"));
                 champ.setCreatedAt(rs.getLong("created_at"));
                 champ.setLastUpdatedAt(rs.getLong("last_updated_at"));
