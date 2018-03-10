@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.eyequeue.lolabilities.model.AbilityType;
 import com.eyequeue.lolabilities.model.AllData;
+import com.eyequeue.lolabilities.model.ChampImage;
 import com.eyequeue.lolabilities.model.ChampionRecord;
 import com.eyequeue.lolabilities.util.Variables;
 import com.google.gson.Gson;
@@ -53,8 +54,32 @@ public class GetData {
                 champ.setCreatedAt(rs.getLong("created_at"));
                 champ.setLastUpdatedAt(rs.getLong("last_updated_at"));
                 champs.add(champ);
-            }           
-            rs = statement.executeQuery("select max(last_updated_at) as 'timestamp' from (select last_updated_at from champ union select last_updated_at from ability_type) t;");
+            }
+            
+            rs = statement.executeQuery("select id, `type`, image, created_at, last_updated_at from images where last_updated_at > " + timestamp + ";");
+            List<ChampImage> champImages = new ArrayList<>();
+            while (rs.next()){
+                ChampImage champImage = new ChampImage();
+                champImage.setId(rs.getInt("id"));
+                champImage.setType(rs.getString("type"));
+                champImage.setImage(rs.getString("image"));
+                champImage.setCreatedAt(rs.getLong("created_at"));
+                champImage.setLastUpdatedAt(rs.getLong("last_updated_at"));
+                champImages.add(champImage);
+            }
+            String patch = "";
+            String imagesLink = "";
+            rs = statement.executeQuery("select id, `name`, `value`, created_at, last_updated_at from variable;");
+            while(rs.next()) {
+            	if(rs.getString("name").equals("patch")) {
+            		patch = rs.getString("value");
+            	}
+            	else if(rs.getString("name").equals("images_link")) {
+            		imagesLink = rs.getString("value");
+            	}
+            }
+            
+            rs = statement.executeQuery("select max(last_updated_at) as 'timestamp' from (select last_updated_at from champ union select last_updated_at from ability_type union select last_updated_at from variable) t;");
             long lastUpdated = 0;
             while(rs.next()) {
             	lastUpdated = rs.getLong("timestamp");
@@ -65,7 +90,11 @@ public class GetData {
 
             allData.setAbilityTypes(abilityTypes);
             allData.setChampions(champs);
+            allData.setImages(champImages);
+            allData.setPatch(patch);
+            allData.setImagesLink(imagesLink);
             allData.setLastUpdated(lastUpdated);
+            
             String abilityTypesJson = gson.toJson(abilityTypes);
             System.out.println(abilityTypesJson);
             
