@@ -2,12 +2,15 @@ package com.eyequeue.lolabilities;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -103,6 +106,27 @@ public class GetData {
             e.printStackTrace();
         }
 		return gson.toJson(allData);
+	}
+	
+	@POST
+	@Path("champ")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String editChamp(String champStr) {
+		ChampionRecord champ = new Gson().fromJson(champStr, ChampionRecord.class);
+		try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(Variables.MYSQL_URL, Variables.MYSQL_USER, Variables.MYSQL_PASSWORD);
+            PreparedStatement stmt = con.prepareStatement("update champ set details = ?, last_updated_at = ? where id = ?");
+            stmt.setString(1, champ.getDetails());
+            stmt.setLong(2, System.currentTimeMillis());
+            stmt.setInt(3, champ.getId());
+            stmt.executeUpdate();
+            stmt.close();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return "[]";
 	}
 
 }
